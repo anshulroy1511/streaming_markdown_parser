@@ -4,7 +4,7 @@ const blogpostMarkdown = `# control
 
 ## Setup
 
-\`\`\`bash
+\`\`\`bash 
 git clone git@github.com:anysphere/control
 \`\`\`
 
@@ -177,22 +177,32 @@ function resetLineStructures() {
     }
 }
 
-// appends text to current active element
+// appends text to the correct active element based on current mode
 function appendText(text: string) {
     if (!text) return;
 
-    // create normal text container if nothing is active
+    // create the correct element if none is active
     if (!activeElement) {
-        createTextSpan();
+        if (mode === 'code-block') {
+            createCodeBlock();
+        } else if (mode === 'inline-code') {
+            createInlineCode();
+        } else {
+            createTextSpan();
+        }
     }
 
     activeElement!.textContent += text;
 
-    // track whether next character starts a new line
-    if (text.includes('\n')) {
+    // newline handling
+    if (text === '\n') {
         isLineStart = true;
-        activeElement = null;
-        resetLineStructures();
+
+        // keep the same active element inside fenced code blocks
+        if (mode !== 'code-block') {
+            activeElement = null;
+            resetLineStructures();
+        }
     } else {
         isLineStart = false;
     }
